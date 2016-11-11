@@ -1,4 +1,4 @@
-from functii import *
+from algoritm import *
 import re
 
 try:
@@ -11,13 +11,7 @@ except Exception as e:
 dictionar_cuvinte = get_dictionar_cuvinte(continut_fisier)
 # print(len(dictionar_cuvinte))
 codificare = genereaza_codificare()
+print("Cheie de criptare:", codificare)
 fraza = "But the story was drawn irresistibly towards the older world, and became an account, as it were, of its end and passing away before its beginning and middle had been told."
-fraza_procesata = re.sub("[^a-z]", "", fraza.lower())
-print("Fraza initiala    ", fraza_procesata)
-fraza_codificata = codifica_fraza(fraza_procesata, codificare)
-indivizi = genereaza_indivizi(100)
-evaluare_indivizi = evaluare_fitness_indivizi(indivizi, fraza_codificata, dictionar_cuvinte)
-indivizi_sortati = sorteaza_indivizi(indivizi, evaluare_indivizi)
-print(indivizi_sortati)
-print("acbwziuhyftspdvlgmxknrjeqo")
-print(mutatie_genetica("acbwziuhyftspdvlgmxknrjeqo"))
+dictionar_cuvinte_criptate = codifica_dictionar(dictionar_cuvinte, codificare)
+bucla(dictionar_cuvinte_criptate, dictionar_cuvinte, fraza)

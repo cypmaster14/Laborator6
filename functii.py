@@ -13,16 +13,22 @@ def citeste_fisier(path: str) -> str:
     return file_content
 
 
-def get_dictionar_cuvinte(continut_fisier: str) -> set:
+def get_dictionar_cuvinte(continut_fisier: str) -> list:
     """
         Functie ce construieste dictionarul de cuvinte.
         Dictionarul de cuvinte este multimea tuturor cuvintelor ce se gaseste in text
     :param continut_fisier: Continutul fisierului pe baza caruia construiesc dictionarul de cuvinte
     :return:
     """
-    cuvinte = set(re.findall("\w+", continut_fisier))
+    cuvinte = list(set(re.findall("[a-z]+", continut_fisier)))
     return cuvinte
 
+
+def codifica_dictionar(dictionar_cuvinte: list, codificare: str) -> list:
+    dictionar_cuvinte_criptate = list()
+    for cuvant in dictionar_cuvinte:
+        dictionar_cuvinte_criptate.append(codifica_fraza(cuvant, codificare))
+    return dictionar_cuvinte_criptate
 
 def get_litere_alfabet():
     """
@@ -42,7 +48,8 @@ def get_litere_alfabet():
 def genereaza_codificare():
     """
         Functie ce imi genereaza o codificare
-        La fiecare pas scot din lista de litere dispobilite litera pe care tocmai al ales-o
+        La fiecare pas scot din lista de litere dispobilite litera pe care
+         tocmai al ales-o
     :return:
     """
     codificare = ""
@@ -92,7 +99,8 @@ def genereaza_indivizi(numar_indivizi: int):
     return indivizi
 
 
-def evaluare_fitness_indivizi(indivizi: list, fraza_codificata: str, dictionar: set):
+def evaluare_fitness_indivizi(indivizi: list, dictionar_codificat: list,
+                              dictionar: list):
     """
         Functie ce imi evaluaza fiecare individ pe baza functiei de fitness
         Functie de fitness:Numarul de cuvinte din dictionar care apare in fraza decodificata de fiecare individ
@@ -103,26 +111,30 @@ def evaluare_fitness_indivizi(indivizi: list, fraza_codificata: str, dictionar: 
     """
     scor_indivizi = list()
     for individ in indivizi:
-        fraza_decodificata = decodifica_fraza(fraza_codificata, individ)
-        numar_cuvinte_gasite = determina_cuvinte_gasite(dictionar, fraza_decodificata)
-        scor_indivizi.append(numar_cuvinte_gasite)
+        contor = 0
+        for i in range(len(dictionar)):
+            cuvant_codificat = dictionar_codificat[i]
+            cuvant_decodificat = decodifica_fraza(cuvant_codificat, individ)
+            if cuvant_codificat == cuvant_decodificat:
+                contor += 1
+        scor_indivizi.append(contor)
     return scor_indivizi
 
 
-def determina_cuvinte_gasite(dictionar_cuvinte: set, fraza_decodificata: str):
-    """
-        Functie de fitness
-    :param dictionar_cuvinte:
-    :param fraza_decodificata:
-    :return:
-    """
-    cuvinte_gasite = 0
-    print("Fraza decodificata", fraza_decodificata)
-    for cuvant in dictionar_cuvinte:
-        if fraza_decodificata.find(cuvant) != -1:
-            cuvinte_gasite += 1
-            print("Cuvant gasit", cuvant)
-    return cuvinte_gasite
+# def determina_cuvinte_gasite(dictionar_cuvinte: set, fraza_decodificata: str):
+#     """
+#         Functie de fitness
+#     :param dictionar_cuvinte:
+#     :param fraza_decodificata:
+#     :return:
+#     """
+#     cuvinte_gasite = 0
+#     print("Fraza decodificata", fraza_decodificata)
+#     for cuvant in dictionar_cuvinte:
+#         if fraza_decodificata.find(cuvant) != -1:
+#             cuvinte_gasite += 1
+#             print("Cuvant gasit", cuvant)
+#     return cuvinte_gasite
 
 
 def sorteaza_indivizi(indivizi: list, cuvinte_gasite_de_indivizi: list) -> list:
@@ -133,7 +145,7 @@ def sorteaza_indivizi(indivizi: list, cuvinte_gasite_de_indivizi: list) -> list:
     :return: O lista de tuple in care cheia=>individul; valoarea=>numarul de cuvinte gasite de respectivul individ
     """
     dictionar_indivizi = {indivizi[i]: cuvinte_gasite_de_indivizi[i] for i in range(0, len(indivizi))}
-    print(dictionar_indivizi)
+    #print(dictionar_indivizi)
     indivizi_sortati = [individ for individ in
                         sorted(dictionar_indivizi.items(), key=lambda individ: individ[1], reverse=True)]
     return indivizi_sortati
@@ -181,7 +193,7 @@ def incrucisare_genetica(parinte1: str, parinte2: str):
         for i in range(0, len(lista_copil1)):
             copil1 += lista_copil1[i]
             copil2 += lista_copil2[i]
-    return (copil1, copil2)
+    return copil1, copil2
 
 
 def mutatie_genetica(individ: str):
