@@ -113,7 +113,7 @@ def evaluare_fitness_indivizi(indivizi: list, dictionar_codificat: list,
 
     scor_indivizi = list()
     for individ in indivizi:
-        contor = get_fitness_score(dictionar, dictionar_codificat, individ[0])
+        contor = get_fitness_score(dictionar, dictionar_codificat, individ)
         scor_indivizi.append(contor)
     return scor_indivizi
 
@@ -154,10 +154,9 @@ def sorteaza_indivizi(indivizi: list, cuvinte_gasite_de_indivizi: list) -> list:
     :param cuvinte_gasite_de_indivizi:
     :return: O lista de tuple in care cheia=>individul; valoarea=>numarul de cuvinte gasite de respectivul individ
     """
-    dictionar_indivizi = {indivizi[i]: cuvinte_gasite_de_indivizi[i] for i in range(0, len(indivizi))}
-    # print(dictionar_indivizi)
+    dictionar_indivizi = [(indivizi[i], cuvinte_gasite_de_indivizi[i]) for i in range(0, len(indivizi))]
     indivizi_sortati = [individ for individ in
-                        sorted(dictionar_indivizi.items(), key=lambda individ: individ[1], reverse=True)]
+                        sorted(dictionar_indivizi, key=lambda individ: individ[1], reverse=True)]
     return indivizi_sortati
 
 
@@ -182,7 +181,7 @@ def incrucisare_genetica(parinte1: str, parinte2: str):
     :param parinte2:
     :return: Un tuplu cu cei di copii rezultati in urma incrucisarii
     """
-    index_ruptura = 3
+    index_ruptura = random.randint(2, 26)
     copil1 = parinte1[0:index_ruptura] + parinte2[index_ruptura:]
     copil2 = parinte2[0:index_ruptura] + parinte1[index_ruptura:]
     pozitii_duplicate_copil1 = determina_duplicate_copil(copil1, index_ruptura)

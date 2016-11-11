@@ -25,41 +25,41 @@ def bucla(dictionar_codificat: list, dictionar_cuvinte: list, fraza: str):
                                                dictionar_cuvinte)
 
     scor_maxim = indivizi_sortati[0][1]
-    best_individ = ""
+    gena_valoroasa = indivizi_sortati[0][0]
     numar_blocaje = 0
 
     while not (
-            dictionar_corect_decriptat(dictionar_cuvinte, indivizi_sortati[0])) and numar_blocaje < 100:
+            dictionar_corect_decriptat(dictionar_cuvinte, indivizi_sortati[0])) and numar_blocaje <= 100:
         print("Cel mai bun scor acum este:", indivizi_sortati[0], numar_blocaje)
         noua_gengeratie = list()
         print(indivizi_sortati)
+        elite = list()
+        for i in range(3):
+            individ = indivizi_sortati.pop(0)
+            elite.append(individ)
+            noua_gengeratie.append(individ[0])
 
-        for i in range(0, 9):
-            elita = list()
-            for j in range(i + 1, 10):
-                incrucisate_indivizi(elita, indivizi_sortati[i][0], indivizi_sortati[j][0])
-            elita_sortata = obtine_indivizi_sortati(elita, dictionar_codificat, dictionar_cuvinte)
-            if elita_sortata[0][1] > indivizi_sortati[i][1]:
-                noua_gengeratie.append(elita_sortata[0][0])
-            else:
-                noua_gengeratie.append(indivizi_sortati[i][0])
-            indivizi_sortati.pop(0)
-
-        # for i in range(3):
-        #     noua_gengeratie.append(indivizi_sortati.pop(0)[0])
-
-        for i in range(5):
+        for i in range(20):
             castigator1_turnir = obtine_castigator_turnir(indivizi_sortati)
             castigator2_turnir = obtine_castigator_turnir(indivizi_sortati)
             incrucisate_indivizi(noua_gengeratie, castigator1_turnir[0], castigator2_turnir[0])
 
+        # Incrucisez o elita cu un random
+
+        for i in range(len(elite)):
+            parinte1 = elite[i]
+            parinte2 = random.choice(indivizi_sortati)
+            copii = incrucisare_genetica(parinte1[0], parinte2[0])
+            copil1 = (copii[0], get_fitness_score(dictionar_cuvinte, dictionar_codificat, copii[0]))
+            copil2 = (copii[1], get_fitness_score(dictionar_cuvinte, dictionar_codificat, copii[1]))
+            invingator_competitie = MecanismSelectie.competitie(copil1, copil2)
+            noua_gengeratie.append(invingator_competitie[0])
+            indivizi_sortati.remove(parinte2)
+
         for individ in indivizi_sortati:
             mutant = mutatie_genetica(individ[0])
-            mutant_scor = get_fitness_score(dictionar_cuvinte, dictionar_codificat, mutant)
-            while (mutant_scor < individ[1]):
-                mutant = mutatie_genetica(individ[0])
-                mutant_scor = get_fitness_score(dictionar_cuvinte, dictionar_codificat, mutant)
             noua_gengeratie.append(mutant)
+
         indivizi_sortati = obtine_indivizi_sortati(noua_gengeratie,
                                                    dictionar_codificat,
                                                    dictionar_cuvinte)
@@ -68,11 +68,12 @@ def bucla(dictionar_codificat: list, dictionar_cuvinte: list, fraza: str):
         else:
             numar_blocaje = 0
             scor_maxim = indivizi_sortati[0][1]
-            best_individ = indivizi_sortati[0][0]
-    print("Gena valoroasa:", best_individ)
+            gena_valoroasa = indivizi_sortati[0][0]
+
+    print("Gena valoroasa:", gena_valoroasa)
     print("Numar blocaje:", numar_blocaje)
-    print("Cheie de decriptare:", best_individ)
-    return best_individ
+    print("Cheie de decriptare:", gena_valoroasa)
+    return gena_valoroasa
 
 
 def incrucisate_indivizi(noua_generatie: list, individ1: str, individ2: str):
