@@ -30,6 +30,7 @@ def codifica_dictionar(dictionar_cuvinte: list, codificare: str) -> list:
         dictionar_cuvinte_criptate.append(codifica_fraza(cuvant, codificare))
     return dictionar_cuvinte_criptate
 
+
 def get_litere_alfabet():
     """
         Functie ce imi returneaza literele alfabetului
@@ -110,18 +111,24 @@ def evaluare_fitness_indivizi(indivizi: list, dictionar_codificat: list,
     :return:
     """
 
-
-
     scor_indivizi = list()
     for individ in indivizi:
-        contor = 0
-        for i in range(len(dictionar)):
-            cuvant_codificat = dictionar_codificat[i]
-            cuvant_decodificat = decodifica_fraza(cuvant_codificat, individ)
-            if cuvant_codificat == cuvant_decodificat:
-                contor += 1
+        contor = get_fitness_score(dictionar, dictionar_codificat, individ[0])
         scor_indivizi.append(contor)
     return scor_indivizi
+
+
+def get_fitness_score(dictionar: list, dictionar_codificat: list, individ: str):
+    litere_decriptate = [0 for x in range(26)]
+    for i in range(len(dictionar)):
+        cuvant = dictionar[i]
+        cuvant_codificat = dictionar_codificat[i]
+        cuvant_decodificat = decodifica_fraza(cuvant_codificat, individ)
+        for j in range(len(cuvant)):
+            if cuvant[j] == cuvant_decodificat[j]:
+                litere_decriptate[ord(cuvant[j]) - 97] = 1
+    contor = sum(litere_decriptate)
+    return contor
 
 
 # def determina_cuvinte_gasite(dictionar_cuvinte: set, fraza_decodificata: str):
@@ -148,7 +155,7 @@ def sorteaza_indivizi(indivizi: list, cuvinte_gasite_de_indivizi: list) -> list:
     :return: O lista de tuple in care cheia=>individul; valoarea=>numarul de cuvinte gasite de respectivul individ
     """
     dictionar_indivizi = {indivizi[i]: cuvinte_gasite_de_indivizi[i] for i in range(0, len(indivizi))}
-    #print(dictionar_indivizi)
+    # print(dictionar_indivizi)
     indivizi_sortati = [individ for individ in
                         sorted(dictionar_indivizi.items(), key=lambda individ: individ[1], reverse=True)]
     return indivizi_sortati
