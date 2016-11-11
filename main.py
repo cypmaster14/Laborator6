@@ -1,6 +1,7 @@
 from algoritm import *
 import re
 
+continut_fisier = ""
 try:
     continut_fisier = citeste_fisier("data.txt").lower()
 except Exception as e:

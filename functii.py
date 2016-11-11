@@ -109,6 +109,9 @@ def evaluare_fitness_indivizi(indivizi: list, dictionar_codificat: list,
     :param dictionar:
     :return:
     """
+
+
+
     scor_indivizi = list()
     for individ in indivizi:
         contor = 0
