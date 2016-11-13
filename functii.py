@@ -8,26 +8,42 @@ def citeste_fisier(path: str) -> str:
     :param path: Path-ul catre text
     :return:
     """
-    file_object = open("data.txt", mode="rt")
+    file_object = open(path, mode="rt")
     file_content = file_object.read()
     return file_content
 
 
-def get_dictionar_cuvinte(continut_fisier: str) -> list:
+def get_cuvinte_unice(text: str) -> set:
+    return set(re.findall("[a-z]+", text))
+
+
+def get_dictionar_cuvinte(continut_fisier: str) -> dict:
     """
         Functie ce construieste dictionarul de cuvinte.
         Dictionarul de cuvinte este multimea tuturor cuvintelor ce se gaseste in text
     :param continut_fisier: Continutul fisierului pe baza caruia construiesc dictionarul de cuvinte
     :return:
     """
-    cuvinte = list(set(re.findall("[a-z]+", continut_fisier)))
-    return cuvinte
+    cuvinte = list(get_cuvinte_unice(continut_fisier))
+    dictionar = {i: cuvinte[i] for i in range(len(cuvinte))}
+    return dictionar
 
 
-def codifica_dictionar(dictionar_cuvinte: list, codificare: str) -> list:
-    dictionar_cuvinte_criptate = list()
-    for cuvant in dictionar_cuvinte:
-        dictionar_cuvinte_criptate.append(codifica_fraza(cuvant, codificare))
+def get_subdictionar(dictionar: dict, text_de_extras: str) -> dict:
+    """
+        Se extrage din dictionar acei itemi care au ca valoare un cuvant din textul de extras
+    :param dictionar
+    :param text_de_extras
+    :return:
+    """
+    cuvinte = get_cuvinte_unice(text_de_extras)
+    return {item[0]: item[1] for item in dictionar.items() if
+            item[1] in cuvinte}
+
+
+def codifica_dictionar(dictionar_cuvinte: dict, codificare: str) -> dict:
+    dictionar_cuvinte_criptate = {item[0]: codifica_fraza(item[1], codificare)
+                                  for item in dictionar_cuvinte.items()}
     return dictionar_cuvinte_criptate
 
 
@@ -100,63 +116,51 @@ def genereaza_indivizi(numar_indivizi: int):
     return indivizi
 
 
-def evaluare_fitness_indivizi(indivizi: list, dictionar_codificat: list,
-                              dictionar: list):
+def evaluare_fitness_indivizi(indivizi: list, dictionar_codificat: dict,
+                              dictionar: dict):
     """
         Functie ce imi evaluaza fiecare individ pe baza functiei de fitness
         Functie de fitness:Numarul de cuvinte din dictionar care apare in fraza decodificata de fiecare individ
     :param indivizi:
-    :param fraza_codificata:
+    :param dictionar_codificat:
     :param dictionar:
     :return:
     """
 
     scor_indivizi = list()
     for individ in indivizi:
-        contor = get_fitness_score(dictionar, dictionar_codificat, individ)
+        contor = get_fitness_score(dictionar_codificat, dictionar, individ)
         scor_indivizi.append(contor)
     return scor_indivizi
 
 
-def get_fitness_score(dictionar: list, dictionar_codificat: list, individ: str):
-    litere_decriptate = [0 for x in range(26)]
-    for i in range(len(dictionar)):
-        cuvant = dictionar[i]
-        cuvant_codificat = dictionar_codificat[i]
-        cuvant_decodificat = decodifica_fraza(cuvant_codificat, individ)
-        for j in range(len(cuvant)):
+def get_fitness_score(dictionar_codificat: dict, dictionar: dict,
+                      posibila_decodificare: str) -> int:
+    litere_decriptate = [0] * 26
+    for item in dictionar_codificat.items():
+        cuvant_codificat = item[1]
+        cuvant_decodificat = decodifica_fraza(cuvant_codificat,
+                                              posibila_decodificare)
+        cuvant = dictionar.get(item[0])
+        for j in range(len(cuvant_decodificat)):
             if cuvant[j] == cuvant_decodificat[j]:
-                litere_decriptate[ord(cuvant[j]) - 97] = 1
-    contor = sum(litere_decriptate)
-    return contor
+                litere_decriptate[ord(cuvant_decodificat[j]) - 97] = 1
+    return sum(litere_decriptate)
 
 
-# def determina_cuvinte_gasite(dictionar_cuvinte: set, fraza_decodificata: str):
-#     """
-#         Functie de fitness
-#     :param dictionar_cuvinte:
-#     :param fraza_decodificata:
-#     :return:
-#     """
-#     cuvinte_gasite = 0
-#     print("Fraza decodificata", fraza_decodificata)
-#     for cuvant in dictionar_cuvinte:
-#         if fraza_decodificata.find(cuvant) != -1:
-#             cuvinte_gasite += 1
-#             print("Cuvant gasit", cuvant)
-#     return cuvinte_gasite
-
-
-def sorteaza_indivizi(indivizi: list, cuvinte_gasite_de_indivizi: list) -> list:
+def sorteaza_indivizi(indivizi: list,
+                      scoruri_indivizi: list) -> list:
     """
         Functie ce realizeaza indivizi sortati dupa functia de fitness
     :param indivizi:
-    :param cuvinte_gasite_de_indivizi:
+    :param scoruri_indivizi:
     :return: O lista de tuple in care cheia=>individul; valoarea=>numarul de cuvinte gasite de respectivul individ
     """
-    dictionar_indivizi = [(indivizi[i], cuvinte_gasite_de_indivizi[i]) for i in range(0, len(indivizi))]
+    dictionar_indivizi = [(indivizi[i], scoruri_indivizi[i]) for i in
+                          range(0, len(indivizi))]
     indivizi_sortati = [individ for individ in
-                        sorted(dictionar_indivizi, key=lambda individ: individ[1], reverse=True)]
+                        sorted(dictionar_indivizi,
+                               key=lambda individ: individ[1], reverse=True)]
     return indivizi_sortati
 
 
@@ -190,12 +194,13 @@ def incrucisare_genetica(parinte1: str, parinte2: str):
         lista_copil1 = [litera for litera in copil1]
         lista_copil2 = [litera for litera in copil2]
         for i in range(0, len(pozitii_duplicate_copil1)):
-            lista_copil1[pozitii_duplicate_copil1[i]], lista_copil2[pozitii_duplicate_copil2[i]] = lista_copil2[
-                                                                                                       pozitii_duplicate_copil2[
-                                                                                                           i]], \
-                                                                                                   lista_copil1[
-                                                                                                       pozitii_duplicate_copil1[
-                                                                                                           i]]
+            lista_copil1[pozitii_duplicate_copil1[i]], lista_copil2[
+                pozitii_duplicate_copil2[i]] = lista_copil2[
+                                                   pozitii_duplicate_copil2[
+                                                       i]], \
+                                               lista_copil1[
+                                                   pozitii_duplicate_copil1[
+                                                       i]]
 
         copil1 = ""
         copil2 = ""

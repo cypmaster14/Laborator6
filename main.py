@@ -1,5 +1,4 @@
 from algoritm import *
-import re
 
 continut_fisier = ""
 try:
@@ -10,16 +9,16 @@ except Exception as e:
     exit()
 
 dictionar_cuvinte = get_dictionar_cuvinte(continut_fisier)
-# print(len(dictionar_cuvinte))
 codificare = genereaza_codificare()
-print(get_litere_alfabet())
-print("Cheie de criptare:", codificare)
 fraza = "But the story was drawn irresistibly towards the older world, and became an account, as it were, of its end and passing away before its beginning and middle had been told."
-dictionar_cuvinte_criptate = codifica_dictionar(dictionar_cuvinte, codificare)
-cheie_descriptare = bucla(dictionar_cuvinte_criptate, dictionar_cuvinte, fraza)
-print("Cheie de   criptare:", codificare)
-litere_gasita = 0
+subdictionar_cuvinte = get_subdictionar(dictionar_cuvinte, continut_fisier)
+dictionar_cuvinte_criptate = codifica_dictionar(subdictionar_cuvinte,
+                                                codificare)
+cheie_descriptare = decodifica(dictionar_cuvinte_criptate, dictionar_cuvinte)
+print("Cheie de criptare:  ", codificare)
+print("Cheie de decriptare:", cheie_descriptare)
+litere_gasite = 0
 for i in range(len(codificare)):
     if codificare[i] == cheie_descriptare[i]:
-        litere_gasita+=1
-print("Litera gasite:", litere_gasita)
+        litere_gasite += 1
+print("Litere corect decriptate:", litere_gasite)
